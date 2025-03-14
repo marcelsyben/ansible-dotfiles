@@ -1,0 +1,19 @@
+- name: Upgrade Ubuntu to the next release
+  hosts: localhost
+  become: true
+  tasks:
+
+    - name: Ensure the system is fully updated before upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+
+    - name: Install update-manager-core (required for release upgrade)
+      ansible.builtin.apt:
+        name: update-manager-core
+        state: present
+
+    - name: Run do-release-upgrade in non-interactive mode
+      ansible.builtin.command: do-release-upgrade -f DistUpgradeViewNonInteractive
+      register: upgrade_result
+      changed_when: "'No new release found' not in upgrade_result.stdout"
